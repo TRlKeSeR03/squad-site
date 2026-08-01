@@ -1,0 +1,29 @@
+name: Steam Status Güncelle
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # her 10 dakikada bir (GitHub'ın izin verdiği en pratik aralık)
+  workflow_dispatch:          # Actions sekmesinden manuel de çalıştırılabilir
+
+permissions:
+  contents: write
+
+jobs:
+  update-status:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Steam durumunu çek
+        env:
+          STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
+          STEAM_ID: ${{ secrets.STEAM_ID }}
+        run: node scripts/fetch-steam.js
+
+      - name: Değişikliği commit'le
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/steam-status.json
+          git diff --staged --quiet || git commit -m "steam durumu güncellendi"
+          git push
