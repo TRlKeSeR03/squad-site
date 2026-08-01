@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>squad // terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0f12;
+    --panel:#15181c;
+    --border:#262b31;
+    --ink:#e7e4da;
+    --muted:#767c84;
+    --amber:#ffb02e;
+    --online:#3ddc84;
+    --busy:#e05252;
+    --away:#e0c152;
+    --offline:#4a4f56;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(255,176,46,0.06), transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    padding:6vh 1.25rem 4rem;
+  }
+  .mono{font-family:"JetBrains Mono",monospace;}
+  .wrap{max-width:640px;margin:0 auto;}
+
+  /* boot header */
+  .boot{font-family:"JetBrains Mono",monospace;font-size:0.8rem;color:var(--muted);margin-bottom:0.35rem;}
+  .boot .path{color:var(--amber);}
+  h1{
+    font-family:"JetBrains Mono",monospace;
+    font-size:1.5rem;
+    margin:0 0 0.15rem;
+    letter-spacing:-0.02em;
+  }
+  .cursor{display:inline-block;width:0.55em;height:1.05em;background:var(--amber);vertical-align:-0.15em;animation:blink 1.1s step-end infinite;margin-left:2px;}
+  @keyframes blink{50%{opacity:0;}}
+  .sub{color:var(--muted);font-size:0.85rem;margin:0 0 2.25rem;}
+
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:1.25rem;
+    margin-bottom:1rem;
+  }
+  .tag{
+    font-family:"JetBrains Mono",monospace;
+    font-size:0.68rem;
+    letter-spacing:0.12em;
+    color:var(--amber);
+    background:rgba(255,176,46,0.08);
+    border:1px solid rgba(255,176,46,0.25);
+    padding:0.15rem 0.5rem;
+    border-radius:5px;
+    display:inline-block;
+    margin-bottom:0.9rem;
+  }
+
+  /* voice button */
+  .join-btn{
+    display:flex;align-items:center;justify-content:center;gap:0.6rem;
+    width:100%;padding:0.95rem;border-radius:8px;border:none;
+    background:var(--amber);color:#1a1204;font-weight:700;font-size:0.95rem;
+    text-decoration:none;font-family:"JetBrains Mono",monospace;
+    letter-spacing:0.02em;
+    transition:filter 0.15s, transform 0.1s;
+  }
+  .join-btn:hover{filter:brightness(1.08);}
+  .join-btn:active{transform:scale(0.985);}
+  .join-hint{font-size:0.75rem;color:var(--muted);margin-top:0.6rem;text-align:center;}
+
+  /* steam list */
+  .steam-updated{font-size:0.72rem;color:var(--muted);margin-bottom:0.75rem;}
+  .friend{
+    display:flex;align-items:center;gap:0.75rem;
+    padding:0.55rem 0.15rem;
+    border-bottom:1px solid var(--border);
+  }
+  .friend:last-child{border-bottom:none;}
+  .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .friend .name{font-size:0.88rem;font-weight:500;}
+  .friend .game{font-size:0.78rem;color:var(--muted);}
+  .friend .avatar{width:28px;height:28px;border-radius:6px;flex-shrink:0;background:#000;}
+  .empty{color:var(--muted);font-size:0.82rem;}
+
+  /* links */
+  .link-row{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0.6rem 0.7rem;background:#0f1114;border:1px solid var(--border);
+    border-radius:7px;margin-bottom:0.5rem;
+  }
+  .link-row a{color:var(--ink);text-decoration:none;font-size:0.86rem;font-weight:500;}
+  .link-row a:hover{color:var(--amber);}
+  .link-del{
+    background:none;border:1px solid var(--border);color:var(--busy);
+    font-family:"JetBrains Mono",monospace;font-size:0.7rem;
+    padding:0.2rem 0.5rem;border-radius:5px;cursor:pointer;
+  }
+
+  /* admin trigger */
+  .admin-trigger{
+    position:fixed;top:1rem;right:1rem;
+    width:30px;height:30px;border-radius:50%;
+    border:1px solid var(--border);background:var(--panel);
+    color:var(--muted);cursor:pointer;font-size:0.85rem;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .admin-trigger:hover{color:var(--amber);border-color:var(--amber);}
+
+  .admin-panel{border-color:rgba(255,176,46,0.35);}
+  .admin-panel input{
+    width:100%;background:#0f1114;border:1px solid var(--border);color:var(--ink);
+    padding:0.55rem 0.6rem;border-radius:6px;font-size:0.83rem;margin-bottom:0.5rem;
+    font-family:"JetBrains Mono",monospace;
+  }
+  .admin-panel input::placeholder{color:var(--muted);}
+  .admin-panel button.action{
+    width:100%;padding:0.6rem;border-radius:6px;border:1px solid var(--border);
+    background:#1c2024;color:var(--ink);font-size:0.8rem;cursor:pointer;
+    font-family:"JetBrains Mono",monospace;
+  }
+  .admin-panel button.action:hover{border-color:var(--amber);color:var(--amber);}
+  .admin-status{font-size:0.72rem;color:var(--muted);margin-top:0.6rem;min-height:1em;}
+  .admin-status.err{color:var(--busy);}
+  .admin-status.ok{color:var(--online);}
+  .hidden{display:none !important;}
+
+  footer{text-align:center;color:var(--muted);font-size:0.7rem;margin-top:2rem;font-family:"JetBrains Mono",monospace;}
+</style>
+</head>
+<body>
+
+<button class="admin-trigger mono" id="adminTrigger" title="admin">&#9881;</button>
+
+<div class="wrap">
+
+  <div class="boot mono">guest@squad<span class="path">:~$</span> ./durum.sh</div>
+  <h1>squad<span class="cursor"></span></h1>
+  <p class="sub">sesli oda &middot; steam durumu &middot; ortak bağlantılar</p>
+
+  <!-- VOICE -->
+  <div class="panel">
+    <span class="tag mono">VOICE</span>
+    <a id="meetLink" class="join-btn" href="#" target="_blank" rel="noopener">&#9679;&nbsp; ODAYA KATIL</a>
+    <p class="join-hint">sabit link &middot; giriş/onay yok &middot; tek tık</p>
+  </div>
+
+  <!-- STEAM -->
+  <div class="panel">
+    <span class="tag mono">STEAM</span>
+    <div class="steam-updated mono" id="steamUpdated"></div>
+    <div id="steamList"><p class="empty">yükleniyor...</p></div>
+  </div>
+
+  <!-- LINKS -->
+  <div class="panel">
+    <span class="tag mono">LINKS</span>
+    <div id="linkList"></div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="panel admin-panel hidden" id="adminPanel">
+    <span class="tag mono" style="color:var(--ink);background:transparent;border-color:var(--border);">ADMIN</span>
+
+    <div id="adminAuth">
+      <input type="password" id="ghToken" placeholder="GitHub token (repo yazma izinli)">
+      <button class="action" id="ghTokenSave">Bağlan</button>
+      <p class="admin-status mono" id="authStatus"></p>
+    </div>
+
+    <div id="adminForm" class="hidden">
+      <input type="text" id="linkName" placeholder="Başlık">
+      <input type="text" id="linkUrl" placeholder="https://...">
+      <button class="action" id="addLinkBtn">Bağlantı Ekle</button>
+      <p class="admin-status mono" id="adminStatus"></p>
+      <button class="action" id="ghTokenClear" style="margin-top:0.5rem;border-color:var(--busy);color:var(--busy);">Bağlantıyı Kes</button>
+    </div>
+  </div>
+
+  <footer class="mono">GitHub Pages</footer>
+</div>
+
+<script>
+/* ====== AYARLAR — kendine göre düzenle ====== */
+const CONFIG = {
+  meetLink: "https://meet.jit.si/babapirolar0330",   // Jitsi oda linkin (sabit)
+  ghOwner: "TRlKeSeR03",                                 // GitHub kullanıcı adın
+  ghRepo:  "squad-site",                                      // repo adı
+  linksPath: "data/links.json",
+  steamPath: "data/steam-status.json",
+  branch: "main"
+};
+/* ============================================ */
+
+document.getElementById('meetLink').href = CONFIG.meetLink;
+
+/* ---------- STEAM STATUS ---------- */
+const stateInfo = {
+  0:{label:"çevrimdışı", color:"var(--offline)"},
+  1:{label:"çevrimiçi", color:"var(--online)"},
+  2:{label:"meşgul", color:"var(--busy)"},
+  3:{label:"uzakta", color:"var(--away)"},
+  4:{label:"uyuyor", color:"var(--away)"},
+  5:{label:"çevrimiçi", color:"var(--online)"},
+  6:{label:"çevrimiçi", color:"var(--online)"}
+};
+
+fetch(CONFIG.steamPath + "?_=" + Date.now())
+  .then(r => { if(!r.ok) throw new Error(); return r.json(); })
+  .then(data => {
+    const list = document.getElementById('steamList');
+    const players = (data.players || []).filter(p => p.state !== 0);
+    document.getElementById('steamUpdated').textContent =
+      "son güncelleme: " + new Date(data.updated_at).toLocaleTimeString('tr-TR');
+
+    if(players.length === 0){
+      list.innerHTML = '<p class="empty">şu an aktif kimse yok</p>';
+      return;
+    }
+    list.innerHTML = players.map(p => {
+      const s = stateInfo[p.state] || stateInfo[0];
+      return `
+        <div class="friend">
+          <img class="avatar" src="${p.avatar}" alt="">
+          <span class="dot" style="background:${s.color}"></span>
+          <div>
+            <div class="name">${escapeHtml(p.name)}</div>
+            <div class="game">${p.game ? escapeHtml(p.game) : s.label}</div>
+          </div>
+        </div>`;
+    }).join('');
+  })
+  .catch(() => {
+    document.getElementById('steamList').innerHTML =
+      '<p class="empty">steam verisi henüz yok — GitHub Action ilk çalıştığında burada görünecek</p>';
+  });
+
+/* ---------- LINKS (public read) ---------- */
+function loadLinks(){
+  return fetch(CONFIG.linksPath + "?_=" + Date.now())
+    .then(r => r.ok ? r.json() : [])
+    .catch(() => []);
+}
+function renderLinks(links){
+  const el = document.getElementById('linkList');
+  if(!links.length){ el.innerHTML = '<p class="empty">henüz bağlantı yok</p>'; return; }
+  el.innerHTML = links.map((l,i) => `
+    <div class="link-row" data-i="${i}">
+      <a href="${escapeAttr(l.url)}" target="_blank" rel="noopener">${escapeHtml(l.name)}</a>
+      ${isAdmin ? `<button class="link-del mono" data-idx="${i}">sil</button>` : ''}
+    </div>`).join('');
+  if(isAdmin){
+    el.querySelectorAll('.link-del').forEach(btn => {
+      btn.addEventListener('click', () => deleteLink(parseInt(btn.dataset.idx)));
+    });
+  }
+}
+let currentLinks = [];
+loadLinks().then(links => { currentLinks = links; renderLinks(links); });
+
+/* ---------- ADMIN (GitHub Contents API üzerinden yazma) ---------- */
+let isAdmin = false;
+const TOKEN_KEY = 'squad_gh_token';
+
+const adminTrigger = document.getElementById('adminTrigger');
+const adminPanel = document.getElementById('adminPanel');
+const adminAuth = document.getElementById('adminAuth');
+const adminForm = document.getElementById('adminForm');
+const authStatus = document.getElementById('authStatus');
+const adminStatus = document.getElementById('adminStatus');
+
+adminTrigger.addEventListener('click', () => {
+  adminPanel.classList.toggle('hidden');
+  const saved = localStorage.getItem(TOKEN_KEY);
+  if(saved){ verifyToken(saved); }
+});
+
+document.getElementById('ghTokenSave').addEventListener('click', () => {
+  const t = document.getElementById('ghToken').value.trim();
+  if(!t) return;
+  verifyToken(t);
+});
+
+document.getElementById('ghTokenClear').addEventListener('click', () => {
+  localStorage.removeItem(TOKEN_KEY);
+  isAdmin = false;
+  adminAuth.classList.remove('hidden');
+  adminForm.classList.add('hidden');
+  document.getElementById('ghToken').value = '';
+  authStatus.textContent = '';
+  renderLinks(currentLinks);
+});
+
+function ghHeaders(token){
+  return {
+    "Authorization": "Bearer " + token,
+    "Accept": "application/vnd.github+json"
+  };
+}
+
+function verifyToken(token){
+  authStatus.textContent = "kontrol ediliyor...";
+  authStatus.className = "admin-status mono";
+  fetch(`https://api.github.com/repos/${CONFIG.ghOwner}/${CONFIG.ghRepo}`, { headers: ghHeaders(token) })
+    .then(r => {
+      if(!r.ok) throw new Error("yetkisiz");
+      localStorage.setItem(TOKEN_KEY, token);
+      isAdmin = true;
+      adminAuth.classList.add('hidden');
+      adminForm.classList.remove('hidden');
+      renderLinks(currentLinks);
+    })
+    .catch(() => {
+      authStatus.textContent = "token geçersiz veya repoya erişemiyor";
+      authStatus.className = "admin-status mono err";
+    });
+}
+
+document.getElementById('addLinkBtn').addEventListener('click', () => {
+  const name = document.getElementById('linkName').value.trim();
+  const url = document.getElementById('linkUrl').value.trim();
+  if(!name || !url) return;
+  currentLinks.push({name, url});
+  commitLinks("bağlantı eklendi: " + name).then(() => {
+    document.getElementById('linkName').value = '';
+    document.getElementById('linkUrl').value = '';
+  });
+});
+
+function deleteLink(idx){
+  const removed = currentLinks[idx];
+  currentLinks.splice(idx, 1);
+  commitLinks("bağlantı silindi: " + (removed ? removed.name : ""));
+}
+
+function commitLinks(message){
+  const token = localStorage.getItem(TOKEN_KEY);
+  adminStatus.textContent = "kaydediliyor...";
+  adminStatus.className = "admin-status mono";
+  const apiUrl = `https://api.github.com/repos/${CONFIG.ghOwner}/${CONFIG.ghRepo}/contents/${CONFIG.linksPath}`;
+
+  return fetch(apiUrl, { headers: ghHeaders(token) })
+    .then(r => r.ok ? r.json() : Promise.reject(r))
+    .then(existing => putFile(existing.sha))
+    .catch(err => {
+      if(err && err.status === 404){ return putFile(null); }
+      return Promise.reject(err);
+    })
+    .then(() => {
+      adminStatus.textContent = "kaydedildi ✓";
+      adminStatus.className = "admin-status mono ok";
+      renderLinks(currentLinks);
+    })
+    .catch(() => {
+      adminStatus.textContent = "kaydedilemedi — token izinlerini kontrol et";
+      adminStatus.className = "admin-status mono err";
+    });
+
+  function putFile(sha){
+    const body = {
+      message,
+      content: b64EncodeUnicode(JSON.stringify(currentLinks, null, 2)),
+      branch: CONFIG.branch
+    };
+    if(sha) body.sha = sha;
+    return fetch(apiUrl, {
+      method: "PUT",
+      headers: { ...ghHeaders(token), "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }).then(r => { if(!r.ok) return Promise.reject(r); return r.json(); });
+  }
+}
+
+function b64EncodeUnicode(str){
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+    (m, p1) => String.fromCharCode('0x' + p1)));
+}
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s){ return escapeHtml(s); }
+</script>
+</body>
+</html>
