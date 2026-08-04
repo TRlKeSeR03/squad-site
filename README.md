@@ -46,3 +46,23 @@ Panel, `data/links.json` dosyasını doğrudan GitHub üzerinden güncelliyor �
 4. Artık başlık + URL girip "Bağlantı Ekle" diyebilir, listedeki "sil" ile kaldırabilirsin — her işlem doğrudan repoya commit atar ve site birkaç saniye içinde güncellenir.
 
 Arkadaşların siteyi ziyaret ettiğinde sadece görüntüler; admin paneli onlara görünmez çünkü token'ları yok.
+
+## 5. Duyuru + Bildirim (opsiyonel)
+
+Admin panelden yazdığın duyuru hem sitede bir bant olarak görünür hem de bildirimlere izin veren herkese anlık push bildirimi olarak gider (metin + istersen bir bağlantı ile).
+
+Kurulum:
+
+1. https://onesignal.com adresinde ücretsiz hesap aç, **New App/Website** de, platform olarak **Web Push** seç.
+2. Site URL'i olarak GitHub Pages adresini gir (`https://kullaniciadin.github.io/repo-adin/`).
+3. Kurulum sihirbazı bittiğinde **Settings > Keys & IDs** kısmına git, iki değeri not al:
+   - **OneSignal App ID**
+   - **REST API Key**
+4. `index.html` içindeki `CONFIG.oneSignalAppId` satırına App ID'yi yaz (bu gizli değil, tarayıcıda görünmesi normal).
+5. Repo **Settings > Secrets and variables > Actions** kısmına iki secret ekle:
+   - `ONESIGNAL_APP_ID` → App ID
+   - `ONESIGNAL_REST_API_KEY` → REST API Key (bu **gizli**, asla koda yazma — sadece secret olarak kalsın)
+6. Siteyi ziyaret eden biri sağ üstteki 🔔 ikonuna basıp tarayıcı izni verirse bildirimlere abone olur.
+7. Admin panelinden bir duyuru gönderdiğinde, bu `data/announcement.json`'ı günceller → bu da otomatik olarak "Duyuru Bildirimi Gönder" GitHub Action'ını tetikler → OneSignal üzerinden abone olan herkese birkaç saniye içinde bildirim gider.
+
+Not: Bildirimler tarayıcı/işletim sistemi seviyesinde çalışır (Web Push), telefon veya bilgisayarda siteyi ziyaret edip izin vermiş olman yeterli — site açık olmasa bile bildirim gelir.

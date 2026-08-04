@@ -6,6 +6,7 @@
 <title>squad // terminal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <style>
   :root{
     --bg:#0d0f12;
@@ -117,7 +118,36 @@
   }
   .admin-trigger:hover{color:var(--amber);border-color:var(--amber);}
 
+  /* announcement banner */
+  .announce{
+    display:none;
+    border-color:rgba(255,176,46,0.4);
+    background:linear-gradient(180deg, rgba(255,176,46,0.06), transparent);
+  }
+  .announce.show{display:block;}
+  .announce-text{font-size:0.95rem;font-weight:500;margin:0 0 0.4rem;}
+  .announce a.announce-link{color:var(--amber);font-size:0.82rem;text-decoration:none;font-family:"JetBrains Mono",monospace;}
+  .announce a.announce-link:hover{text-decoration:underline;}
+  .announce-time{font-size:0.68rem;color:var(--muted);margin-top:0.5rem;font-family:"JetBrains Mono",monospace;}
+
+  .bell-trigger{
+    position:fixed;top:1rem;right:3.4rem;
+    width:30px;height:30px;border-radius:50%;
+    border:1px solid var(--border);background:var(--panel);
+    color:var(--muted);cursor:pointer;font-size:0.85rem;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .bell-trigger:hover{color:var(--amber);border-color:var(--amber);}
+  .bell-trigger.on{color:var(--online);border-color:var(--online);}
+
   .admin-panel{border-color:rgba(255,176,46,0.35);}
+  .admin-panel textarea{
+    width:100%;background:#0f1114;border:1px solid var(--border);color:var(--ink);
+    padding:0.55rem 0.6rem;border-radius:6px;font-size:0.83rem;margin-bottom:0.5rem;
+    font-family:"JetBrains Mono",monospace;resize:vertical;min-height:3.2rem;
+  }
+  .admin-subhead{font-size:0.72rem;color:var(--muted);letter-spacing:0.06em;margin:1rem 0 0.5rem;text-transform:uppercase;}
+  .admin-checkline{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.6rem;font-size:0.8rem;color:var(--ink);}
   .admin-panel input{
     width:100%;background:#0f1114;border:1px solid var(--border);color:var(--ink);
     padding:0.55rem 0.6rem;border-radius:6px;font-size:0.83rem;margin-bottom:0.5rem;
@@ -140,6 +170,7 @@
 </head>
 <body>
 
+<button class="bell-trigger mono hidden" id="bellTrigger" title="bildirimler">&#128276;</button>
 <button class="admin-trigger mono" id="adminTrigger" title="admin">&#9881;</button>
 
 <div class="wrap">
@@ -147,6 +178,14 @@
   <div class="boot mono">guest@squad<span class="path">:~$</span> ./durum.sh</div>
   <h1>squad<span class="cursor"></span></h1>
   <p class="sub">sesli oda &middot; steam durumu &middot; ortak bağlantılar</p>
+
+  <!-- ANNOUNCEMENT -->
+  <div class="panel announce" id="announcePanel">
+    <span class="tag mono">DUYURU</span>
+    <p class="announce-text" id="announceText"></p>
+    <a class="announce-link mono hidden" id="announceLink" target="_blank" rel="noopener"></a>
+    <p class="announce-time mono" id="announceTime"></p>
+  </div>
 
   <!-- VOICE -->
   <div class="panel">
@@ -179,6 +218,13 @@
     </div>
 
     <div id="adminForm" class="hidden">
+      <div class="admin-subhead mono">Duyuru</div>
+      <textarea id="announceMsg" placeholder="Duyuru metni (örn. 21:00 CS, gelen gelsin)"></textarea>
+      <input type="text" id="announceUrl" placeholder="Bağlantı (opsiyonel) https://...">
+      <button class="action" id="sendAnnounceBtn">Duyuru Gönder</button>
+      <p class="admin-status mono" id="announceStatus"></p>
+
+      <div class="admin-subhead mono">Bağlantılar</div>
       <input type="text" id="linkName" placeholder="Başlık">
       <input type="text" id="linkUrl" placeholder="https://...">
       <button class="action" id="addLinkBtn">Bağlantı Ekle</button>
@@ -193,11 +239,13 @@
 <script>
 /* ====== AYARLAR — kendine göre düzenle ====== */
 const CONFIG = {
-  meetLink: "https://meet.jit.si/babapirolar0330",   // Jitsi oda linkin (sabit)
-  ghOwner: "TRlKeSeR03",                                 // GitHub kullanıcı adın
-  ghRepo:  "squad-site",                                      // repo adı
+  meetLink: "https://meet.jit.si/senin-oda-adin-buraya",   // Jitsi oda linkin (sabit)
+  ghOwner: "KULLANICI_ADIN",                                 // GitHub kullanıcı adın
+  ghRepo:  "REPO_ADIN",                                      // repo adı
   linksPath: "data/links.json",
   steamPath: "data/steam-status.json",
+  announcePath: "data/announcement.json",
+  oneSignalAppId: "ONESIGNAL_APP_ID_BURAYA",                 // OneSignal Dashboard > Settings > Keys & IDs
   branch: "main"
 };
 /* ============================================ */
@@ -244,6 +292,58 @@ fetch(CONFIG.steamPath + "?_=" + Date.now())
     document.getElementById('steamList').innerHTML =
       '<p class="empty">steam verisi henüz yok — GitHub Action ilk çalıştığında burada görünecek</p>';
   });
+
+/* ---------- ANNOUNCEMENT (public read) ---------- */
+function loadAnnouncement(){
+  fetch(CONFIG.announcePath + "?_=" + Date.now())
+    .then(r => r.ok ? r.json() : null)
+    .then(data => {
+      const panel = document.getElementById('announcePanel');
+      if(!data || !data.text){ panel.classList.remove('show'); return; }
+      document.getElementById('announceText').textContent = data.text;
+      const linkEl = document.getElementById('announceLink');
+      if(data.url){
+        linkEl.href = data.url;
+        linkEl.textContent = "↗ bağlantıyı aç";
+        linkEl.classList.remove('hidden');
+      } else {
+        linkEl.classList.add('hidden');
+      }
+      document.getElementById('announceTime').textContent =
+        data.time ? new Date(data.time).toLocaleString('tr-TR') : '';
+      panel.classList.add('show');
+    })
+    .catch(() => {});
+}
+loadAnnouncement();
+
+/* ---------- PUSH NOTIFICATIONS (OneSignal) ---------- */
+const bellTrigger = document.getElementById('bellTrigger');
+const oneSignalReady = CONFIG.oneSignalAppId && !CONFIG.oneSignalAppId.includes("BURAYA");
+
+if(oneSignalReady){
+  bellTrigger.classList.remove('hidden');
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal){
+    await OneSignal.init({ appId: CONFIG.oneSignalAppId });
+    updateBellState(OneSignal);
+    OneSignal.User.PushSubscription.addEventListener('change', () => updateBellState(OneSignal));
+
+    bellTrigger.addEventListener('click', async () => {
+      const optedIn = OneSignal.User.PushSubscription.optedIn;
+      if(optedIn){
+        await OneSignal.User.PushSubscription.optOut();
+      } else {
+        await OneSignal.Notifications.requestPermission();
+        await OneSignal.User.PushSubscription.optIn();
+      }
+      updateBellState(OneSignal);
+    });
+  });
+}
+function updateBellState(OneSignal){
+  bellTrigger.classList.toggle('on', !!OneSignal.User.PushSubscription.optedIn);
+}
 
 /* ---------- LINKS (public read) ---------- */
 function loadLinks(){
@@ -325,6 +425,49 @@ function verifyToken(token){
       authStatus.className = "admin-status mono err";
     });
 }
+
+document.getElementById('sendAnnounceBtn').addEventListener('click', () => {
+  const text = document.getElementById('announceMsg').value.trim();
+  const url = document.getElementById('announceUrl').value.trim();
+  if(!text) return;
+  const data = { text, url: url || null, time: new Date().toISOString() };
+  const status = document.getElementById('announceStatus');
+  const token = localStorage.getItem(TOKEN_KEY);
+  const apiUrl = `https://api.github.com/repos/${CONFIG.ghOwner}/${CONFIG.ghRepo}/contents/${CONFIG.announcePath}`;
+
+  status.textContent = "gönderiliyor...";
+  status.className = "admin-status mono";
+
+  fetch(apiUrl, { headers: ghHeaders(token) })
+    .then(r => r.ok ? r.json() : Promise.reject(r))
+    .then(existing => putAnnounce(existing.sha))
+    .catch(err => (err && err.status === 404) ? putAnnounce(null) : Promise.reject(err))
+    .then(() => {
+      status.textContent = "duyuru gönderildi ✓ (bildirim birkaç saniye içinde iletilir)";
+      status.className = "admin-status mono ok";
+      document.getElementById('announceMsg').value = '';
+      document.getElementById('announceUrl').value = '';
+      loadAnnouncement();
+    })
+    .catch(() => {
+      status.textContent = "gönderilemedi — token izinlerini kontrol et";
+      status.className = "admin-status mono err";
+    });
+
+  function putAnnounce(sha){
+    const body = {
+      message: "duyuru güncellendi: " + text.slice(0, 40),
+      content: b64EncodeUnicode(JSON.stringify(data, null, 2)),
+      branch: CONFIG.branch
+    };
+    if(sha) body.sha = sha;
+    return fetch(apiUrl, {
+      method: "PUT",
+      headers: { ...ghHeaders(token), "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }).then(r => { if(!r.ok) return Promise.reject(r); return r.json(); });
+  }
+});
 
 document.getElementById('addLinkBtn').addEventListener('click', () => {
   const name = document.getElementById('linkName').value.trim();

@@ -1,0 +1,20 @@
+name: Duyuru Bildirimi Gönder
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "data/announcement.json"
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: OneSignal'e bildirim gönder
+        env:
+          ONESIGNAL_APP_ID: ${{ secrets.ONESIGNAL_APP_ID }}
+          ONESIGNAL_REST_API_KEY: ${{ secrets.ONESIGNAL_REST_API_KEY }}
+        run: node scripts/send-notification.js
