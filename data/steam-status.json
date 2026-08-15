@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-15T21:04:21.390Z",
+  "updated_at": "2026-08-15T21:32:41.732Z",
   "players": [
     {
       "steamid": "76561198726364457",
@@ -13,7 +13,7 @@
       "steamid": "76561199047681810",
       "name": "XANTARES",
       "avatar": "https://avatars.steamstatic.com/0ed4c67cee7f4e9b21af4b72209a3091f8dda148_medium.jpg",
-      "state": 3,
+      "state": 4,
       "game": null,
       "profile_url": "https://steamcommunity.com/profiles/76561199047681810/"
     },
@@ -26,20 +26,20 @@
       "profile_url": "https://steamcommunity.com/profiles/76561199610275408/"
     },
     {
-      "steamid": "76561198744999109",
-      "name": "Vespasian",
-      "avatar": "https://avatars.steamstatic.com/68308970a4f4e8acc5eb2634f503f40b16d7fd3f_medium.jpg",
-      "state": 1,
-      "game": "Counter-Strike 2",
-      "profile_url": "https://steamcommunity.com/profiles/76561198744999109/"
-    },
-    {
       "steamid": "76561198941405026",
       "name": "mylittlepony",
       "avatar": "https://avatars.steamstatic.com/9938f46ae9a8c75e7c8fda7272300e1380356d4b_medium.jpg",
       "state": 1,
       "game": "Counter-Strike 2",
       "profile_url": "https://steamcommunity.com/profiles/76561198941405026/"
+    },
+    {
+      "steamid": "76561198744999109",
+      "name": "Vespasian",
+      "avatar": "https://avatars.steamstatic.com/68308970a4f4e8acc5eb2634f503f40b16d7fd3f_medium.jpg",
+      "state": 1,
+      "game": "Counter-Strike 2",
+      "profile_url": "https://steamcommunity.com/profiles/76561198744999109/"
     },
     {
       "steamid": "76561199234571616",
@@ -74,12 +74,20 @@
       "profile_url": "https://steamcommunity.com/profiles/76561199064999810/"
     },
     {
-      "steamid": "76561199429326864",
-      "name": "moleküler",
-      "avatar": "https://avatars.steamstatic.com/ec4edfb0bd9fda1d1e893efda3a547397117edca_medium.jpg",
+      "steamid": "76561199418695863",
+      "name": "arifhuseyinkocer",
+      "avatar": "https://avatars.steamstatic.com/087a48aab0d1f27af6c4e0dce8d9a071c2b3ec6f_medium.jpg",
       "state": 0,
       "game": null,
-      "profile_url": "https://steamcommunity.com/profiles/76561199429326864/"
+      "profile_url": "https://steamcommunity.com/profiles/76561199418695863/"
+    },
+    {
+      "steamid": "76561198204301747",
+      "name": "adambilgehan",
+      "avatar": "https://avatars.steamstatic.com/af33b7438e187cbf8cd628c46511e30a5b326294_medium.jpg",
+      "state": 0,
+      "game": null,
+      "profile_url": "https://steamcommunity.com/id/adambilgehan/"
     },
     {
       "steamid": "76561198361670088",
@@ -98,28 +106,12 @@
       "profile_url": "https://steamcommunity.com/profiles/76561199233617034/"
     },
     {
-      "steamid": "76561198204301747",
-      "name": "adambilgehan",
-      "avatar": "https://avatars.steamstatic.com/af33b7438e187cbf8cd628c46511e30a5b326294_medium.jpg",
-      "state": 0,
-      "game": null,
-      "profile_url": "https://steamcommunity.com/id/adambilgehan/"
-    },
-    {
       "steamid": "76561198291872240",
       "name": "BÖRÜ",
       "avatar": "https://avatars.steamstatic.com/e1d8f547407b063ba908a79e2142eddf1207bf04_medium.jpg",
       "state": 0,
       "game": null,
       "profile_url": "https://steamcommunity.com/profiles/76561198291872240/"
-    },
-    {
-      "steamid": "76561198978201040",
-      "name": "zibidi",
-      "avatar": "https://avatars.steamstatic.com/7c23586ff76bde72dcda7cac6c15d7a735d96174_medium.jpg",
-      "state": 0,
-      "game": null,
-      "profile_url": "https://steamcommunity.com/profiles/76561198978201040/"
     },
     {
       "steamid": "76561198878894929",
@@ -130,12 +122,20 @@
       "profile_url": "https://steamcommunity.com/id/BaBaProtr03/"
     },
     {
-      "steamid": "76561199418695863",
-      "name": "arifhuseyinkocer",
-      "avatar": "https://avatars.steamstatic.com/087a48aab0d1f27af6c4e0dce8d9a071c2b3ec6f_medium.jpg",
+      "steamid": "76561199429326864",
+      "name": "moleküler",
+      "avatar": "https://avatars.steamstatic.com/ec4edfb0bd9fda1d1e893efda3a547397117edca_medium.jpg",
       "state": 0,
       "game": null,
-      "profile_url": "https://steamcommunity.com/profiles/76561199418695863/"
+      "profile_url": "https://steamcommunity.com/profiles/76561199429326864/"
+    },
+    {
+      "steamid": "76561198978201040",
+      "name": "zibidi",
+      "avatar": "https://avatars.steamstatic.com/7c23586ff76bde72dcda7cac6c15d7a735d96174_medium.jpg",
+      "state": 0,
+      "game": null,
+      "profile_url": "https://steamcommunity.com/profiles/76561198978201040/"
     }
   ]
 }
